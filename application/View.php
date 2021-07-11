@@ -1,45 +1,37 @@
 <?php
 /*************************************************************************************************
- * 	Fecha: 2020-12-10
- *		Descripci�n: 	Clase View
  *							Reestructura la vista, trae datos y archivos necesarios desde el controller
  *************************************************************************************************/
 
 class View{
    private $_controlador;
+   private $_params;
    private $_js;
-   private $_css;
+   private $_css; // Listo, con Controller, View, y index....  con eso ya explico el front listo quiere ver el de convilidad ajaj 
    private $_img;
    private $_ico;
 
    public function __construct(Request $peticion){
-      $this->_controlador = $peticion->getControlador();
+      $this->_controlador  = $peticion->getControlador();
+      $this->_params = $peticion->getParam();
       $this->_js  = [];
       $this->_css = [];
       $this->_img = [];
       $this->_ico = [];
    }
 
-   public function renderizar_vista($vista, $item = false){
-      $rutaView = ROOT. 'views/' . $this->_controlador . '/' . $vista.'.phtml';
 
-      if(is_readable($rutaView)){
-         include_once $rutaView;
-      }else{
-         throw new Exception('Error en la Vista: '. $rutaView);
-      }
-   }
 
-   public function renderizar($vista, $item = false, $finaliza=0){
-      
-      $menu = [['id'=>'inicio', 'titulo'=>'INICIO', 'enlace'=>BASE_URL]];
-      
-      if(Session::get('autenticado') == 0){
-         $menu[] =  array('id'=>'login',     'titulo'=>'INICIAR SESI�N',   'enlace'=>BASE_URL.'login');
-      }else{
-         $menu[] = array('id'=>'bitacora',      'titulo'=>'BITACORA',         'enlace'=>BASE_URL.'bitacora');
-         
-      }
+   public function renderizar($vista, $nav = null, $finaliza=0, $fondo= 0){   
+      //require_once APP_LIBS. 'notificacion.phtml';
+
+      // por defect carga con nav construido por perfil
+      // 0 = no hay nav, 
+      // 1 = nav video index con js de url
+      // 2 = nav video sin js 
+
+
+
 
    	$js  = count($this->_js)? $this->_js:[];
       $css = count($this->_css)? $this->_css:[];
@@ -52,31 +44,79 @@ class View{
          'ruta_js'   => 	BASE_URL .'public/'.DEFAULT_LAYOUT.'/js/',
          'ruta_img'  => 	BASE_URL .'public/'.DEFAULT_LAYOUT.'/img/',
          'ruta_ico'  =>  BASE_URL .'public/'.DEFAULT_LAYOUT.'/ico/',
-         'menu'      => $menu,
+ //        'menu'      => $menu,
          'js'        => $js,
          'img'       => $img,
          'ico'       => $ico,
          'css'       => $css
       );
+
       
       $rutaView ='_views/'. $this->_controlador . '/' .$vista.'.phtml';
-      echo '<br>ruta -> '.$rutaView.'<br>';
-      echo 'vista ->'. $vista.'<br>';
+      //echo '<br>ruta -> '.$rutaView.'<br>';
+      //echo 'vista ->'. $vista.'<br>';
+
+
       if(is_readable($rutaView)){
          include_once ROOT.'_views/index/header.php';
+
+         if(!isset($nav)){
+            echo $_SESSION['s_menu'];
+         }else{
+         switch ($nav) {
+            case 0:
+            break;
+            case 1:
+               require_once APP_LIBS.'navgeneralvideo.phtml';
+               menuIndex();
+            break;
+            case 2:
+               require_once APP_LIBS.'navgeneralvideo.phtml';
+               menuIndex(0);
+            break;
+            case 3:
+               require_once APP_LIBS.'navgeneralvideo.phtml';
+               menuIndex(0 , 0);
+            break;
+            case 4:
+            break;
+            case 5;
+               if(isset($_SESSION['usuario'])){ 
+                  echo $_SESSION['s_menu'];
+            }else{
+               require_once APP_LIBS.'navgeneralvideo.phtml';
+               menuIndex();
+            }
+            break;
+
+            
+         }
+
+         switch ($fondo) {
+            case 0:
+               $this->setCss(['jav']);
+               //$this->set
+               break;
+            case 1:
+               break;
+         }
+   
+      }
  
-         include_once  $rutaView;
-         include_once ROOT.'_views/index/footer.php';
+      include_once  $rutaView;
+      include_once ROOT.'_views/index/footer.php';
+
     	}else{
       	throw new Exception('Error de Vista - ');
       }
       if($finaliza!=0) die();
-  	}
+     if(!isset($nav)) require_once APP_LIBS. 'notificacion.phtml';
+      }
 
 	public function setCss(array $css){
 		if(is_array($css) && count($css)){
-      	for($i=0; $i < count($css); $i++){
-      		$this->_css[] = $css[$i]. '.css';
+         foreach( $css as $c ){
+            $this->_css[] = $c.'.css';
          }
      	}else{
       	throw new Exception('Error de css');
@@ -85,9 +125,9 @@ class View{
 
    public function setJs(array $js){
       if(is_array($js) && count($js)){
-         for($i=0; $i < count($js); $i++){
-            $this->_js[] = $js[$i]. '.js';
-         }
+        foreach ($js as $j ){
+           $this->_js[] = $j.'.js';
+        }
       }else{
          throw new Exception('Error de js');
       }
@@ -111,6 +151,43 @@ class View{
       }else{
          throw new Exception('Error de icono');
       }
+   }
+
+   public function setTable( $idTabla , $ordenPorDefecto = null , $filaSinOrden = null){
+    
+  //    echo "
+  //    <script>
+  //  $(document).ready(function() {
+  //       $('table th i').addClass( 'fas fa-arrows-alt-v')
+  //      $('table').addClass('tablesorte table-hover bg-white table-sm table-bordered table-striped')
+  //      $('table thead').addClass('shadow-sm')
+  //      $('#$idTabla').tablesorter({
+  //          widgets: ['zebra']";
+  //         // echo 'ordenDefect ->'. $ordenPorDefecto;
+  //          if( isset($ordenPorDefecto)) {echo"
+  //          ,
+  //          sortList: [
+  //              [$ordenPorDefecto , 1]
+  //          ]";
+  //          }
+  //          if( isset($filaSinOrden) ){
+  //          echo "
+  //          ,
+  //          headers: {
+  //             $filaSinOrden: {
+  //                  sorter: false
+  //              }
+  //          }
+  //          ";
+  //       }
+
+   //      echo "
+   //     });
+   // });
+   //</script>
+   //   ";
+
+
    }
 }
 
