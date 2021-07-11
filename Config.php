@@ -9,7 +9,7 @@ define("imgProducto", "ProductoSinImagen.png");
 
 //controlador por defecto de nuestra aplicacion
 //define('BASE_URL', 'https://localhost/jfa/sicloud/'); 
-define('BASE_URL', 'https://imcoabher/');  
+define('BASE_URL', 'https://imcoabher.herokuapp.com/');  
 define('DEFAULT_CONTROLLER', 'index');
 define('DEFAULT_LAYOUT', 'layout1');
 
